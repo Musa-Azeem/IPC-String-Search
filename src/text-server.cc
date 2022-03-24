@@ -14,7 +14,7 @@ int TextServer::runServer(){
     std::string sem_name = "/semaphorep3";
     int sm_fd;
     int success;
-    struct stat sb;
+    // struct stat sb;
     // Create semaphore
     sem_unlink(&sem_name[0]);   //unlink if exists
     sem_t *sem = sem_open(&sem_name[0], O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, 0); //TODO add modes
@@ -27,13 +27,12 @@ int TextServer::runServer(){
     sm_fd = shm_open(&sm_name[0], O_RDONLY | O_WRONLY | O_EXCL, S_IRUSR | S_IWUSR);
     if(sm_fd == -1)
         std::cerr << "Error opening shared memory" << std::endl;
-    fstat(sm_fd, &sb);
-    std::cout << sb.st_size << std::endl;
-    sm_struct_ptr = (SmStruct*)mmap(0, sb.st_size, PROT_WRITE | PROT_READ, MAP_SHARED, sm_fd, 0);
+    // fstat(sm_fd, &sb);
+    sm_struct_ptr = static_cast<SmStruct*>(mmap(0, sizeof(SmStruct), PROT_WRITE | PROT_READ, MAP_SHARED, sm_fd, 0));
     close(sm_fd);
     if(sm_struct_ptr == MAP_FAILED)
         std::cerr << "Error mapping memory to structure" << std::endl;
-    // std::cout << (*sm_struct_ptr).path << std::endl;
+    std::cout << sm_struct_ptr->path << std::endl;
     
     //AFTER READING path and search str
     //save lines of text to saved mem

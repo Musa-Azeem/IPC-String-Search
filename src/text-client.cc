@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <string>
+#include <string.h>
 #include <iostream>
 #include <semaphore.h>
 
@@ -34,21 +34,23 @@ int TextClient::runClient(){
     if(success < 0)
         std::cerr << "Error setting size of shared memory" << std::endl;
     // Map shared memory to structure
-    sm_struct_ptr = (SmStruct*)mmap(0, sizeof(SmStruct), PROT_WRITE | PROT_READ, MAP_SHARED, sm_fd, 0);
+    sm_struct_ptr = static_cast<SmStruct*>(mmap(0, sizeof(SmStruct), PROT_WRITE | PROT_READ, MAP_SHARED, sm_fd, 0));
     std::cout << sizeof(SmStruct) << std::endl;
     if(sm_struct_ptr == MAP_FAILED)
         std::cerr << "Error mapping memory to structure" << std::endl;
     close(sm_fd);
     // Initialize structure
-    (*sm_struct_ptr).path = path;
+    strncpy(sm_struct_ptr->path, &path[0], path.size());
+    std::cout << sm_struct_ptr->path << std::endl;
+    // sm_struct_ptr->path = path;
 
     //here, have to signal text-server to read shared mem
     sem_post(sem);  //unlock server after sending path
     // wait for text-server to save lines to shm
-    std::cout << "unlocked server" << std::endl;
-    std::cout << "waiting" << std::endl;
+    // std::cout << "unlocked server" << std::endl;
+    // std::cout << "waiting" << std::endl;
     // sem_wait(sem);
-    std::cout << "done waiting" << std::endl;
+    // std::cout << "done waiting" << std::endl;
     //create threads to search
 
     sem_close(sem);
