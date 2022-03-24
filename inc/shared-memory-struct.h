@@ -5,7 +5,6 @@
 
 struct SmStruct{
     std::string path;
-    std::string search_str;
     std::vector<std::string> file_lines;
 };
 
