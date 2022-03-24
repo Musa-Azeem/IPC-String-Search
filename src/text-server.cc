@@ -17,7 +17,7 @@ int TextServer::runServer(){
     struct stat sb;
     // Create semaphore
     sem_unlink(&sem_name[0]);   //unlink if exists
-    sem_t *sem = sem_open(&sem_name[0], O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, 0);
+    sem_t *sem = sem_open(&sem_name[0], O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, 0); //TODO add modes
     if(sem == SEM_FAILED)
         std::cout << "Error creating semaphore" << std::endl;
     std::cout << "waiting" << std::endl;
