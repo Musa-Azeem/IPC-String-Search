@@ -24,7 +24,7 @@ int TextServer::runServer(){
     sem_wait(sem);
     // Step 1: Start Server
     // Step 2: Recieve filename and path from client
-    sm_fd = shm_open(&sm_name[0], O_RDONLY | O_WRONLY | O_EXCL, S_IRUSR | S_IWUSR);
+    sm_fd = shm_open(&sm_name[0], O_RDWR| O_EXCL, S_IRUSR | S_IWUSR);
     if(sm_fd == -1)
         std::cerr << "Error opening shared memory" << std::endl;
     // fstat(sm_fd, &sb);
