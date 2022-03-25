@@ -5,20 +5,22 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <string>
+#include <string.h>
 #include <iostream>
 #include <semaphore.h>
+#include <fstream>
+#include <vector>
 
 TextServer::TextServer(std::string sm_name, std::string sem_name)
     : SharedMemoryManager(sm_name, sem_name) 
     {}
 int TextServer::runServer(){
-    std::string sem_name = "/semaphorep3";
+    // std::string sem_name = "/semaphorep3";
+    const char EOT = '\004';
+    std::string INV = "_INVALID_FILE";
     int sm_fd;
     int success;
-    std::string path;
-    std::string file_lines;
-    size_t kBufferSize;
+    std::vector<std::string> file_lines;
     // Step 1: Start Server
     // Create semaphore
     sem_unlink(&sem_name[0]);   //unlink if exists
@@ -26,22 +28,27 @@ int TextServer::runServer(){
                           O_CREAT | O_EXCL, 
                           S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, 
                           0);
-    if(sem == SEM_FAILED)
-        std::cout << "Error creating semaphore" << std::endl;
-
+    if(sem == SEM_FAILED){
+        std::cerr << "Error creating semaphore" << std::endl;
+        return(-1);
+    }
     std::cout << "SERVER STARTED" << std::endl;
-    sem_wait(sem);  // Wait for Client to write path to shm
+
+    // Use semaphore to wait for Client to write path to shared memory
+    sem_wait(sem);  
 
     // Step 2: Recieve filename and path from client
-    std::cout << "CLIENT REQUEST RECEIVED" << std::endl;
+    // Step 3: Open shared Memory created by Client
+    std::clog << "CLIENT REQUEST RECEIVED" << std::endl;
 
-    // Open shared Memory created by Client
+    // Open Memory
     sm_fd = shm_open(&sm_name[0], 
                     O_RDWR| O_EXCL, 
                     S_IRUSR | S_IWUSR);
-    if(sm_fd == -1)
+    if(sm_fd == -1){
         std::cerr << "Error opening shared memory" << std::endl;
-    
+        return(-1);
+    }
     // Map shared memory to structure
     sm_struct_ptr = static_cast<SmStruct*>(
         mmap(0, 
@@ -51,18 +58,43 @@ int TextServer::runServer(){
             sm_fd, 
             0));
     close(sm_fd);
-    if(sm_struct_ptr == MAP_FAILED)
+    if(sm_struct_ptr == MAP_FAILED){
         std::cerr << "Error mapping memory to structure" << std::endl;
+        return(-1);
+    }
+    std::clog << "\tMEMORY OPEN" << std::endl;
 
-    std::cout << sm_struct_ptr->path << std::endl;
-    
+    // Step 4: Use path to open file and write its contents to shared memory
+    // Open file and read lines 
+    std::ifstream in_file;
+    in_file.open(sm_struct_ptr->path);
+    if(in_file){
+        std::string line;
+        while(getline(in_file, line)){
+            file_lines.push_back(line);
+        }
+    }
+    else{
+        file_lines.push_back(INV);
+    }
+
+    //TODO modify file_lines so that each element is string of size buffer_size
+
+    // Add EOT character to last file lines
+    file_lines.back() += EOT;
+
+    // Write file lines to shared memory
+    for(auto line : file_lines){
+        // line += '\0';
+        strncpy(sm_struct_ptr->buffer, &line[0], line.size()+1);
+        sem_post(sem);
+        sleep(.5);
+        sem_wait(sem);
+    }
     //AFTER READING path and search str
     //save lines of text to saved mem
-    std::cout << "saving stuff to shm" << std::endl;
-    sleep(3);
     //signal client to search
     // sem_post(sem);
-    std::cout << "unlocked client" << std::endl;
     sem_unlink(&sem_name[0]);
-    return(0);
+    return(1);
 }

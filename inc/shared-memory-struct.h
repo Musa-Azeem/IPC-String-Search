@@ -3,13 +3,13 @@
 #include <vector>
 #include <string>
 #define SIZE 4096
-#define PATHSIZE 512
+#define PATHLEN 512
 
 struct SmStruct{
-    const size_t file_path_length = PATHSIZE;
-    char file_path[PATHSIZE];
-    const size_t bufferSize = SIZE - sizeof(size_t) - 512;
-    char path[SIZE-sizeof(size_t)-512-sizeof(size_t)];
+    size_t path_length;
+    char path[PATHLEN];
+    size_t bufferSize = SIZE - (2*sizeof(size_t)) - 512;
+    char buffer[SIZE-(2*sizeof(size_t))-512];
 };
 
 #endif
