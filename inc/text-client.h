@@ -11,7 +11,9 @@ class TextClient: SharedMemoryManager {
     private:
         std::string path;
         std::string search_str;
-        int search(std::vector<std::string> &file_lines);
+        std::vector<std::string> file_lines;
+        std::vector<std::string> found_lines;
+        void *threaded_search(void *ptr);
 };
 
 #endif
