@@ -14,7 +14,6 @@ int TextServer::runServer(){
     std::string sem_name = "/semaphorep3";
     int sm_fd;
     int success;
-    // struct stat sb;
     // Create semaphore
     sem_unlink(&sem_name[0]);   //unlink if exists
     sem_t *sem = sem_open(&sem_name[0], O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, 0); //TODO add modes
@@ -27,7 +26,6 @@ int TextServer::runServer(){
     sm_fd = shm_open(&sm_name[0], O_RDWR| O_EXCL, S_IRUSR | S_IWUSR);
     if(sm_fd == -1)
         std::cerr << "Error opening shared memory" << std::endl;
-    // fstat(sm_fd, &sb);
     sm_struct_ptr = static_cast<SmStruct*>(mmap(0, sizeof(SmStruct), PROT_WRITE | PROT_READ, MAP_SHARED, sm_fd, 0));
     close(sm_fd);
     if(sm_struct_ptr == MAP_FAILED)

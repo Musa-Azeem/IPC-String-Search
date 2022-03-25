@@ -1,7 +1,5 @@
 #ifndef SHAREDMEMORYMANAGER
 #define SHAREDMEMORYMANAGER
-// #define SM_NAME "/text-shared-mem"
-// #define SM_SIZE 4096
 
 #include "./shared-memory-struct.h"
 #include <string>
