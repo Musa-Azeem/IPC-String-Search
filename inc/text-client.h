@@ -6,7 +6,7 @@
 
 class TextClient: SharedMemoryManager {
     public:
-        TextClient(std::string sm_name, std::string path, std::string search_str);
+        TextClient(std::string sm_name, std::string sem_name, std::string path, std::string search_str);
         int runClient();
     private:
         std::string path;

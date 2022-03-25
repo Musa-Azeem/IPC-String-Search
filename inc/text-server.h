@@ -4,7 +4,7 @@
 #include <string>
 class TextServer: SharedMemoryManager {
     public:
-        TextServer(std::string sm_name): SharedMemoryManager(sm_name) {};
+        TextServer(std::string sm_name, std::string sem_name);
         int runServer();
 };
 
