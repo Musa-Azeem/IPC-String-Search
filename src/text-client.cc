@@ -14,6 +14,8 @@
 struct thread_args{
     size_t start_idx;
     size_t stop_idx;
+    // std::vector<std::string> *file_lines;
+    // std::vector<std::string> *search_str;
 };
 
 TextClient::TextClient(std::string sm_name, std::string sem_name, std::string path, std::string search_str)
@@ -75,8 +77,7 @@ int TextClient::runClient(){
 
     // Step 3: Read lines of text from shared memory to local storage
     std::vector<std::string> sm_file_lines;
-    while(sm_file_lines.empty() || 
-          sm_file_lines.back().find(EOT) == std::string::npos){
+    while(sm_file_lines.empty() || sm_file_lines.back().find(EOT) == std::string::npos){
         // Loop until EOT character is found
         // Wait for server to store first lines into shared memory
         sem_wait(sem_two);
@@ -85,8 +86,7 @@ int TextClient::runClient(){
     }
 
     // Remove EOT
-    sm_file_lines.back().erase(sm_file_lines.back().find(EOT), 
-                               sizeof(EOT));
+    sm_file_lines.back().erase(sm_file_lines.back().find(EOT), sizeof(EOT));
 
     // seperate strings read from shared memory by new lines
     for(auto sm_line : sm_file_lines){
@@ -96,9 +96,6 @@ int TextClient::runClient(){
             file_lines.push_back(line);
         }
     }
-    for(auto line : file_lines){
-        std::cout << "line: " << line << std::endl;
-    }
 
     // Step 4: Search file lines for search strings with threads
     if(file_lines.back() == INV){
@@ -107,12 +104,14 @@ int TextClient::runClient(){
     }
     else{
         // Call search method with threads, passing 1/4 of lines to each thread
-        std::cout << file_lines.size() << std::endl;
         std::vector<pthread_t> threads(N_THREADS);
-        std::vector<size_t> idxs(N_THREADS);
+        std::vector<thread_args> idxs(N_THREADS);
         for(int i=0; i<N_THREADS; i++){
-            idxs[i] = i*(file_lines.size() / N_THREADS);
-            std::cout << idxs[i] << std::endl;
+            idxs[i].start_idx = i*(file_lines.size() / N_THREADS);
+            if(i != N_THREADS-1)
+                idxs[i].stop_idx = (i+1)*(file_lines.size() / N_THREADS);
+            else
+                idxs[i].stop_idx = file_lines.size();
             pthread_create(&threads[i], 
                            nullptr, 
                            threaded_search, 
@@ -136,9 +135,13 @@ int TextClient::runClient(){
 
 void *TextClient::threaded_search(void *ptr){
     // Each thread searches file_lines and adds found lines to found_lines
-    size_t start_idx = *static_cast<size_t*>(ptr);
-    std::cout << start_idx << std::endl;
-    // for(int i=start_idx; i<)
+    thread_args idx = *static_cast<thread_args*>(ptr);
+    std::cout << idx.stop_idx << std::endl;
+    // for(int i=idx.start_idx; i<idx.stop_idx; i++){
+    //     if(file_lines.find(search_str) != std::string::npos){
+
+    //     }
+    // }
     return nullptr;
 }
 
