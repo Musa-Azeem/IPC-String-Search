@@ -24,4 +24,4 @@ $(srv_exe): $(srv_src)
 	$(compile.cc)
 
 clean:
-	rm -r $(cli_exe) $(srv_exe
+	rm -r $(cli_exe) $(srv_exe)
