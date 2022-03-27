@@ -1,5 +1,5 @@
 #include "../inc/text-server.h"
-#include "../inc/ipc_names.h"
+#include "../inc/ipc-names.h"
 
 int main(){
     TextServer server(SM_NAME, SEM_NAME);

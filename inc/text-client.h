@@ -1,5 +1,6 @@
 #ifndef TEXT_CLIENT_H
 #define TEXT_CLIENT_H
+
 #include "./shared-memory-manager.h"
 #include <string>
 #include <semaphore.h>
@@ -17,6 +18,12 @@ class TextClient: SharedMemoryManager {
         std::vector<std::string> found_lines;
         static void *threaded_search(void *ptr);
         sem_t thread_sem;
+};
+
+struct ThreadArgs{
+    size_t start_idx;
+    size_t stop_idx;
+    TextClient *client;
 };
 
 #endif

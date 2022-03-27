@@ -1,5 +1,5 @@
 #include "../inc/text-client.h"
-#include "../inc/ipc_names.h"
+#include "../inc/ipc-names.h"
 #include <iostream>
 
 int main(int argc, char **argv){

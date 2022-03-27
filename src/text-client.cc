@@ -11,12 +11,6 @@
 #include <pthread.h>
 #include <sstream>
 
-struct thread_args{
-    size_t start_idx;
-    size_t stop_idx;
-    TextClient *client;
-};
-
 TextClient::TextClient(std::string sm_name, std::string sem_name, std::string path, std::string search_str)
     : SharedMemoryManager(sm_name, sem_name) {
     this->path = path;
@@ -107,7 +101,7 @@ int TextClient::runClient(){
     else{
         // Call search method with threads, passing 1/4 of lines to each thread
         std::vector<pthread_t> threads(N_THREADS);
-        std::vector<thread_args> args(N_THREADS);
+        std::vector<ThreadArgs> args(N_THREADS);
         for(int i=0; i<N_THREADS; i++){
             args[i].client = this;
             args[i].start_idx = i*(file_lines.size() / N_THREADS);
@@ -148,7 +142,7 @@ int TextClient::runClient(){
 
 void *TextClient::threaded_search(void *ptr){
     // Each thread searches file_lines and adds found lines to found_lines
-    thread_args args = *static_cast<thread_args*>(ptr);
+    ThreadArgs args = *static_cast<ThreadArgs*>(ptr);
     for(int i=args.start_idx; i<args.stop_idx; i++){
         if(args.client->file_lines[i].find(args.client->search_str) != std::string::npos){
             sem_wait(&args.client->thread_sem);
