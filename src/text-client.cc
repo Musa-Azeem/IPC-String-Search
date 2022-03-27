@@ -9,6 +9,7 @@
 #include <iostream>
 #include <semaphore.h>
 #include <pthread.h>
+#include <sstream>
 
 struct thread_args{
     size_t start_idx;
@@ -73,18 +74,31 @@ int TextClient::runClient(){
     sem_post(sem);
 
     // Step 3: Read lines of text from shared memory to local storage
-    // std::vector<std::string> sm_file_lines;
-    while(file_lines.empty() || file_lines.back().find(EOT) == std::string::npos){
+    std::vector<std::string> sm_file_lines;
+    while(sm_file_lines.empty() || 
+          sm_file_lines.back().find(EOT) == std::string::npos){
         // Loop until EOT character is found
         // Wait for server to store first lines into shared memory
         sem_wait(sem_two);
-        file_lines.push_back(std::string(sm_struct_ptr->buffer));
+        sm_file_lines.push_back(std::string(sm_struct_ptr->buffer));
         sem_post(sem);
     }
 
     // Remove EOT
-    file_lines.back().erase(file_lines.back().find(EOT), 
-                            sizeof(EOT));
+    sm_file_lines.back().erase(sm_file_lines.back().find(EOT), 
+                               sizeof(EOT));
+
+    // seperate strings read from shared memory by new lines
+    for(auto sm_line : sm_file_lines){
+        std::stringstream ss(sm_line);
+        std::string line;
+        while(std::getline(ss, line, '\n')){
+            file_lines.push_back(line);
+        }
+    }
+    for(auto line : file_lines){
+        std::cout << "line: " << line << std::endl;
+    }
 
     // Step 4: Search file lines for search strings with threads
     if(file_lines.back() == INV){
