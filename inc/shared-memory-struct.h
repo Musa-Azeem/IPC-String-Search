@@ -8,7 +8,7 @@
 struct SmStruct{
     size_t path_length;
     char path[PATH_LEN];
-    size_t bufferSize;
+    size_t buffer_size;
     char buffer[BUFFER_SIZE];
 };
 

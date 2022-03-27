@@ -1,5 +1,5 @@
-#ifndef SHAREDMEMORYMANAGER
-#define SHAREDMEMORYMANAGER
+#ifndef SHAREDMEMORYMANAGER_H
+#define SHAREDMEMORYMANAGER_H
 
 #include "./shared-memory-struct.h"
 #include <string>
@@ -9,7 +9,6 @@ class SharedMemoryManager{
     public:
         SharedMemoryManager(std::string sm_name, std::string sem_name)
             :sm_name(sm_name), sem_name(sem_name), sem_name_two(sm_name+"_two"){};
-            //TODO mv to .cc and check for /
     protected:
         const std::string sm_name;
         const std::string sem_name;

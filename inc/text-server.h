@@ -1,5 +1,5 @@
-#ifndef TEXTSERVER
-#define TEXTSERVER
+#ifndef TEXTSERVER_H
+#define TEXTSERVER_H
 #include "shared-memory-manager.h"
 #include <string>
 class TextServer: SharedMemoryManager {

@@ -19,19 +19,20 @@ TextServer::TextServer(std::string sm_name, std::string sem_name)
 int TextServer::runServer(){
     int sm_fd;
     int success;
+    std::string path;
+    size_t buffer_size;
     std::vector<std::string> file_lines;
 
     // Step 1: Start Server
     std::cout << "SERVER STARTED" << std::endl;
 
-    // Set up signal handler to clean up
-
     // Destroy semphores if they exist
     sem_destroy(sem);
+    sem_unlink(&sem_name[0]);
     sem_destroy(sem_two);
+    sem_unlink(&sem_name_two[0]);
 
     // Create semaphores
-    sem_unlink(&sem_name[0]);   //unlink if exists
     sem = sem_open(&sem_name[0], 
                           O_CREAT | O_EXCL, 
                           S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, 
@@ -40,7 +41,6 @@ int TextServer::runServer(){
         std::cerr << "Error creating semaphore 1" << std::endl;
         return(-1);
     }
-    sem_unlink(&sem_name_two[0]);   //unlink if exists
     sem_two = sem_open(&sem_name_two[0], 
                           O_CREAT | O_EXCL, 
                           S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, 
@@ -60,7 +60,6 @@ int TextServer::runServer(){
 
         // Step 2: Recieve filename and path from client
         // Step 3: Open shared Memory created by Client
-        std::clog << "CLIENT REQUEST RECEIVED" << std::endl;
 
         // Open Memory
         sm_fd = shm_open(&sm_name[0], 
@@ -82,23 +81,28 @@ int TextServer::runServer(){
             std::cerr << "Error mapping memory to structure" << std::endl;
             return(-1);
         }
+
+        // Recieve the filename and path from client
+        path = sm_struct_ptr->path;
+        buffer_size = sm_struct_ptr->buffer_size;
+
+        std::clog << "CLIENT REQUEST RECEIVED" << std::endl;
         std::clog << "\tMEMORY OPEN" << std::endl;
 
         // Step 4: Use path to open file and write its contents to shared memory
-        // Open file and read lines 
+        // Open file
+        std::clog << "\tOpening: " << path << std::endl;
         std::ifstream in_file;
-        in_file.open(sm_struct_ptr->path);
+        in_file.open(path);
         if(in_file){
             size_t bytes_read;
             std::string line;
             file_lines.push_back("");
             while(getline(in_file, line)){
-                if((bytes_read+line.size()+1) < sm_struct_ptr->bufferSize){
+                if((bytes_read+line.size()+1) < buffer_size){
                     // Add lines to same string until it reaches shared memory's buffer size
                     file_lines.back() += line+"\n";
                     bytes_read += line.size() + 1;
-                    // std::cout << "+"<< line.size() << std::endl;
-                    // std::cout << "="<< file_lines.back().size() << std::endl;
                 }
                 else{
                     // Once string reaches shared memory's buffer size, create new element in vector
@@ -108,8 +112,13 @@ int TextServer::runServer(){
             }
         }
         else{
+            // Indicate to client if file open failed
             file_lines.push_back(INV);
         }
+        // Close file
+        in_file.close();
+        std::clog << "\tFile Closed" << std::endl;
+
         // Add EOT character to last file lines
         file_lines.back() += EOT;
 
@@ -120,9 +129,10 @@ int TextServer::runServer(){
             sem_wait(sem);
         }
 
-        // Clean up
+        // Close shared memory
         close(sm_fd);
         munmap(sm_struct_ptr, SHM_SIZE);
+        std::clog << "\tMemory Closed" << std::endl;
     }
     return(1);
 }

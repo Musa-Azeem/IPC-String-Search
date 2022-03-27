@@ -1,5 +1,5 @@
-#ifndef TEXT_CLIENT
-#define TEXT_CLIENT
+#ifndef TEXT_CLIENT_H
+#define TEXT_CLIENT_H
 #include "./shared-memory-manager.h"
 #include <string>
 #include <semaphore.h>

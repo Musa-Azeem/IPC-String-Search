@@ -1,6 +1,3 @@
-create loop in server
-override C-d signal in server
-clean up main files
 clean up makefile
 make makefile look pro
     variables for flags
@@ -8,5 +5,5 @@ make makefile look pro
     clean
 clean up code
 comments
-clean directory
+readme
 double triple check instructions

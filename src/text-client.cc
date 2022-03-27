@@ -15,10 +15,6 @@ struct thread_args{
     size_t start_idx;
     size_t stop_idx;
     TextClient *client;
-    // std::vector<std::string> *file_lines;
-    // std::vector<std::string> *found_lines;
-    // std::string *search_str;
-    // sem_t *thread_sem;
 };
 
 TextClient::TextClient(std::string sm_name, std::string sem_name, std::string path, std::string search_str)
@@ -47,9 +43,12 @@ int TextClient::runClient(){
         std::cerr << "Error opening semaphore" << std::endl;
         return(-1);
     }
-    // STEP 1: Create a shared memory location and initializing with necessary structure
+
+    // STEP 1: Create a shared memory location and initialize with necessary structure
+    // Unlink shared memory if it already exists
+    shm_unlink(&sm_name[0]);
+
     // Create and open shared memory
-    shm_unlink(&sm_name[0]);    //unlink if already exists
     sm_fd = shm_open(&sm_name[0], 
                      O_CREAT|O_RDWR|O_EXCL, 
                      S_IRUSR | S_IWUSR);
@@ -78,7 +77,7 @@ int TextClient::runClient(){
 
     // Step 2: Send file path to server through shared memory
     sm_struct_ptr->path_length = PATH_LEN;
-    sm_struct_ptr->bufferSize = BUFFER_SIZE;
+    sm_struct_ptr->buffer_size = BUFFER_SIZE;
     strncpy(sm_struct_ptr->path, &path[0], path.size());
 
     // Unblock Server once path has been added to shared memory
@@ -88,7 +87,7 @@ int TextClient::runClient(){
     std::string line;
     while(file_lines.empty() || file_lines.back().find(EOT) == std::string::npos){
         // Loop until EOT character is found
-        // Wait for server to store first lines into shared memory
+        // Wait for server to store lines into shared memory
         sem_wait(sem_two);
         std::stringstream ss(sm_struct_ptr->buffer);
         while(std::getline(ss, line, '\n')){
@@ -111,10 +110,6 @@ int TextClient::runClient(){
         std::vector<thread_args> args(N_THREADS);
         for(int i=0; i<N_THREADS; i++){
             args[i].client = this;
-            // args[i].file_lines = &file_lines;
-            // args[i].found_lines = &found_lines;
-            // args[i].search_str = &search_str;
-            // args[i].thread_sem = &thread_sem;
             args[i].start_idx = i*(file_lines.size() / N_THREADS);
             if(i != N_THREADS-1)
                 args[i].stop_idx = (i+1)*(file_lines.size() / N_THREADS);
@@ -128,22 +123,26 @@ int TextClient::runClient(){
         for(auto thread : threads){
             pthread_join(thread, nullptr);
         }
+
         // Step 5: Print found lines to stdout
-        int i = 0;
+        int i = 1;
         for(auto line : found_lines){
             std::cout << i << "\t"+line << std::endl;
             i++;
         }
     }
 
-    // Clean up
-    sem_destroy(&thread_sem);
-    sem_close(sem);
-    sem_close(sem_two);
+    // Step 6: Destroy shared memory location
     close(sm_fd);
     munmap(sm_struct_ptr, SHM_SIZE);
     shm_unlink(&sm_name[0]);
 
+    // Close semaphores
+    sem_destroy(&thread_sem);
+    sem_close(sem);
+    sem_close(sem_two);
+    
+    // Step 7: Return 1 if successful, which will prompt mian to return 0
     return(1);
 }
 
