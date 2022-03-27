@@ -76,26 +76,25 @@ int TextClient::runClient(){
     sem_post(sem);
 
     // Step 3: Read lines of text from shared memory to local storage
-    std::vector<std::string> sm_file_lines;
-    while(sm_file_lines.empty() || sm_file_lines.back().find(EOT) == std::string::npos){
+    std::string line;
+    while(file_lines.empty() || file_lines.back().find(EOT) == std::string::npos){
         // Loop until EOT character is found
         // Wait for server to store first lines into shared memory
         sem_wait(sem_two);
-        sm_file_lines.push_back(std::string(sm_struct_ptr->buffer));
+        std::stringstream ss(sm_struct_ptr->buffer);
+        while(std::getline(ss, line, '\n')){
+            file_lines.push_back(line);
+        }
+
         sem_post(sem);
     }
 
     // Remove EOT
-    sm_file_lines.back().erase(sm_file_lines.back().find(EOT), sizeof(EOT));
+    file_lines.back().erase(file_lines.back().find(EOT), sizeof(EOT));
 
-    // seperate strings read from shared memory by new lines
-    for(auto sm_line : sm_file_lines){
-        std::stringstream ss(sm_line);
-        std::string line;
-        while(std::getline(ss, line, '\n')){
-            file_lines.push_back(line);
-        }
-    }
+    // for(auto line : file_lines){
+    //     std::cout << "line: " << line << std::endl;
+    // }
 
     // Step 4: Search file lines for search strings with threads
     if(file_lines.back() == INV){
@@ -137,11 +136,11 @@ void *TextClient::threaded_search(void *ptr){
     // Each thread searches file_lines and adds found lines to found_lines
     thread_args idx = *static_cast<thread_args*>(ptr);
     std::cout << idx.stop_idx << std::endl;
-    // for(int i=idx.start_idx; i<idx.stop_idx; i++){
-    //     if(file_lines.find(search_str) != std::string::npos){
+    for(int i=idx.start_idx; i<idx.stop_idx; i++){
+        if(file_lines.find(search_str) != std::string::npos){
 
-    //     }
-    // }
+        }
+    }
     return nullptr;
 }
 
