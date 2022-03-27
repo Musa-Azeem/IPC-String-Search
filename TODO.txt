@@ -1,9 +1,3 @@
-clean up makefile
-make makefile look pro
-    variables for flags
-    object files as dependicies
-    clean
-clean up code
 comments
 readme
 double triple check instructions
