@@ -61,7 +61,7 @@ int TextServer::runServer(){
     // Map shared memory to structure
     sm_struct_ptr = static_cast<SmStruct*>(
         mmap(0, 
-            SIZE,
+            SHM_SIZE,
             PROT_WRITE | PROT_READ, 
             MAP_SHARED,
             sm_fd, 
@@ -101,9 +101,6 @@ int TextServer::runServer(){
     // Add EOT character to last file lines
     file_lines.back() += EOT;
 
-    for(auto line : file_lines){
-        std::clog << line;
-    }
     // Write file lines to shared memory
     for(auto line : file_lines){
         strncpy(sm_struct_ptr->buffer, &line[0], line.size()+1);
@@ -115,7 +112,7 @@ int TextServer::runServer(){
     sem_unlink(&sem_name[0]);
     sem_unlink(&sem_name_two[0]);
     close(sm_fd);
-    munmap(sm_struct_ptr, SIZE);
-    
+    munmap(sm_struct_ptr, SHM_SIZE);
+
     return(1);
 }

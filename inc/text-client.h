@@ -4,6 +4,8 @@
 // #include "./shared-memory-struct.h"
 #include <string>
 
+#define N_THREADS 4
+
 class TextClient: SharedMemoryManager {
     public:
         TextClient(std::string sm_name, std::string sem_name, std::string path, std::string search_str);
@@ -13,7 +15,7 @@ class TextClient: SharedMemoryManager {
         std::string search_str;
         std::vector<std::string> file_lines;
         std::vector<std::string> found_lines;
-        void *threaded_search(void *ptr);
+        static void *threaded_search(void *ptr);
 };
 
 #endif
