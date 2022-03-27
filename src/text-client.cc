@@ -15,10 +15,10 @@ struct thread_args{
     size_t start_idx;
     size_t stop_idx;
     TextClient *client;
-    std::vector<std::string> *file_lines;
-    std::vector<std::string> *found_lines;
-    std::string *search_str;
-    sem_t *thread_sem;
+    // std::vector<std::string> *file_lines;
+    // std::vector<std::string> *found_lines;
+    // std::string *search_str;
+    // sem_t *thread_sem;
 };
 
 TextClient::TextClient(std::string sm_name, std::string sem_name, std::string path, std::string search_str)
@@ -37,12 +37,12 @@ int TextClient::runClient(){
     }
 
     // Open Semaphores created by Server
-    sem_t *sem = sem_open(&sem_name[0], 0);
+    sem = sem_open(&sem_name[0], 0);
     if(sem == SEM_FAILED){
         std::cerr << "Error opening semaphore" << std::endl;
         return(-1);
     }
-    sem_t *sem_two = sem_open(&sem_name_two[0], 0);
+    sem_two = sem_open(&sem_name_two[0], 0);
     if(sem_two == SEM_FAILED){
         std::cerr << "Error opening semaphore" << std::endl;
         return(-1);
@@ -94,7 +94,6 @@ int TextClient::runClient(){
         while(std::getline(ss, line, '\n')){
             file_lines.push_back(line);
         }
-
         sem_post(sem);
     }
 
@@ -112,10 +111,10 @@ int TextClient::runClient(){
         std::vector<thread_args> args(N_THREADS);
         for(int i=0; i<N_THREADS; i++){
             args[i].client = this;
-            args[i].file_lines = &file_lines;
-            args[i].found_lines = &found_lines;
-            args[i].search_str = &search_str;
-            args[i].thread_sem = &thread_sem;
+            // args[i].file_lines = &file_lines;
+            // args[i].found_lines = &found_lines;
+            // args[i].search_str = &search_str;
+            // args[i].thread_sem = &thread_sem;
             args[i].start_idx = i*(file_lines.size() / N_THREADS);
             if(i != N_THREADS-1)
                 args[i].stop_idx = (i+1)*(file_lines.size() / N_THREADS);
@@ -152,13 +151,12 @@ void *TextClient::threaded_search(void *ptr){
     // Each thread searches file_lines and adds found lines to found_lines
     thread_args args = *static_cast<thread_args*>(ptr);
     for(int i=args.start_idx; i<args.stop_idx; i++){
-        if((*args.file_lines)[i].find(*args.search_str) != std::string::npos){
-            sem_wait(args.thread_sem);
-            (*args.found_lines).push_back((*args.file_lines)[i]);
-            sem_post(args.thread_sem);
+        if(args.client->file_lines[i].find(args.client->search_str) != std::string::npos){
+            sem_wait(&args.client->thread_sem);
+            args.client->found_lines.push_back(args.client->file_lines[i]);
+            sem_post(&args.client->thread_sem);
         }
     }
-    std::cout << args.client->search_str << std::endl;
     return nullptr;
 }
 
