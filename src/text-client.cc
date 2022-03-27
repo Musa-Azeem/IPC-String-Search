@@ -127,8 +127,11 @@ int TextClient::runClient(){
         for(auto thread : threads){
             pthread_join(thread, nullptr);
         }
+        // Step 5: Print found lines to stdout
+        int i = 0;
         for(auto line : found_lines){
-            std::cout << line << std::endl;
+            std::cout << i << "\t"+line << std::endl;
+            i++;
         }
     }
 
@@ -145,7 +148,6 @@ int TextClient::runClient(){
 
 void *TextClient::threaded_search(void *ptr){
     // Each thread searches file_lines and adds found lines to found_lines
-    // std::vector<std::string> found_lines;
     thread_args args = *static_cast<thread_args*>(ptr);
     for(int i=args.start_idx; i<args.stop_idx; i++){
         if((*args.file_lines)[i].find(*args.search_str) != std::string::npos){

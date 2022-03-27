@@ -1,0 +1,12 @@
+create loop in server
+override C-d signal in server
+clean up main files
+clean up makefile
+make makefile look pro
+    variables for flags
+    object files as dependicies
+    clean
+clean up code
+comments
+clean directory
+double triple check instructions
