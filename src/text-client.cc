@@ -14,6 +14,7 @@
 struct thread_args{
     size_t start_idx;
     size_t stop_idx;
+    TextClient *client;
     std::vector<std::string> *file_lines;
     std::vector<std::string> *found_lines;
     std::string *search_str;
@@ -110,6 +111,7 @@ int TextClient::runClient(){
         std::vector<pthread_t> threads(N_THREADS);
         std::vector<thread_args> args(N_THREADS);
         for(int i=0; i<N_THREADS; i++){
+            args[i].client = this;
             args[i].file_lines = &file_lines;
             args[i].found_lines = &found_lines;
             args[i].search_str = &search_str;
@@ -156,6 +158,7 @@ void *TextClient::threaded_search(void *ptr){
             sem_post(args.thread_sem);
         }
     }
+    std::cout << args.client->search_str << std::endl;
     return nullptr;
 }
 
