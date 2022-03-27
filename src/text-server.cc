@@ -15,11 +15,10 @@ TextServer::TextServer(std::string sm_name, std::string sem_name)
     : SharedMemoryManager(sm_name, sem_name) 
     {}
 int TextServer::runServer(){
-    // const char EOT = '\004';
-    // std::string INV = "_INVALID_FILE";
     int sm_fd;
     int success;
     std::vector<std::string> file_lines;
+    
     // Step 1: Start Server
     std::cout << "SERVER STARTED" << std::endl;
 
@@ -111,6 +110,8 @@ int TextServer::runServer(){
     // Clean up
     sem_unlink(&sem_name[0]);
     sem_unlink(&sem_name_two[0]);
+    sem_destroy(sem);
+    sem_destroy(sem_two);
     close(sm_fd);
     munmap(sm_struct_ptr, SHM_SIZE);
 
