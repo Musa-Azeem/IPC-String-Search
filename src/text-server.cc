@@ -1,3 +1,26 @@
+/*
+Written by Musa Azeem
+This file defines the functions of the TextServer class
+Functions:
+    Default constructor:
+        calls parent contructor to initalize sm_name, sem_name, and sem_name_two
+    runServer:
+        This function runs the text server:
+        1.1) Prints "Start Server" to indicate server starting
+        1.2) Creates two named semaphores for synchronizatin with client, destorying them beforehand if they existed
+        2.1) Blocks until client is run and unblocks server
+        3) Once unblocked by client, opens shared memory created by client
+        2.2) Reads file path from shared memory
+        4.1) Opens and reads file to "file_lines"
+            Reads one line at a time, adding lines to a single string element of "file_lines", delim by \n,
+                until the string reaches the size of the shared memory buffer
+            Then, a new string element is created
+        4.2) Using two semaphores, writes elements of "file_lines" to shared memory,
+            signalling client each element to read buffer
+        4.3) If server was unable to open the file, it writes the "INV" signal to shared memory
+        4.4) After writing file lines to shared memory, server closes shared memory
+        5) Server loops back to step 2.1, waiting for another client
+*/
 #include "../inc/text-server.h"
 #include <sys/mman.h>
 #include <sys/types.h>
@@ -133,6 +156,8 @@ int TextServer::runServer(){
         close(sm_fd);
         munmap(sm_struct_ptr, SHM_SIZE);
         std::clog << "\tMemory Closed" << std::endl;
+
+    // Step 5: Server continues to loop
     }
     return(1);
 }

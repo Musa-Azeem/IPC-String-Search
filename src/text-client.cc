@@ -1,6 +1,39 @@
-#include "../inc/text-client.h"
-#include "../inc/thread-args.h"
-#include <sys/mman.h>
+/*
+Written by Musa Azeem
+This file defines the functions of the TextClient class
+Functions:  
+    Default constructor:
+        calls parent constructor to initialize sm_name, sem_name, and sem_name_two
+        initializes path and search_str with given strings
+    runClient:
+        This functions runs the text client:
+        1.1) opens necessary semaphores, one for threads and two for synchornization with server
+        1.2) creates shared memory and maps it to a "SmStruct" 
+        2.1) passes file path and sizes to server through shared memory structure
+        2.2) unblocks server with "sem" to read file path
+        3) reads file lines from shared memory buffer as server writes to it
+            reads until EOT character is found
+            synchronizes with two semaphores
+            splits each buffer read into lines, adding each line to "file_lines"
+        4.1) if client recieves "INV" as file lines, it print "Invalid File" to stderr
+        4.2) use threads to search 1/4 of "file_lines" per thread, each thread adds found lines to "found_lines"
+            each thread is run with threaded_search function
+            each thread is given a start and stop index to search
+            the last thread created searches until the end of the lines to ensure no lines are missed
+        4.3) wait for all threads to complete
+        5) print all found lines
+        6) destroy shared memory and close / destroy semaphores
+        7) Return 1 on successful completion
+    threaded_search:
+        This static function is passed to threads to search a portion of "file_lines"
+        It is given a start index, stop index, and instance of TextClient through a ThreadArgs struct
+        Threads search the client's file_lines from start index to stop index,
+            adding any found lines to client's "found_lines" member
+        return a nullptr, which is unused
+*/
+#include "../inc/text-client.h"     // Using TextClient
+#include "../inc/thread-args.h"     // Using ThreadArgs
+#include <sys/mman.h>               // Using shared memory               
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -80,10 +113,11 @@ int TextClient::runClient(){
 
     // Step 3: Read lines of text from shared memory to local storage
     std::string line;
+    // Loop until EOT character is found
     while(file_lines.empty() || file_lines.back().find(EOT) == std::string::npos){
-        // Loop until EOT character is found
         // Wait for server to store lines into shared memory
         sem_wait(sem_two);
+        // Split each buffer read by \n, and store in file_lines
         std::stringstream ss(sm_struct_ptr->buffer);
         while(std::getline(ss, line, '\n')){
             file_lines.push_back(line);
