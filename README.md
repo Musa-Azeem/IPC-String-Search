@@ -2,7 +2,6 @@
 
 ## Directory Structure
 ```
-.
 ├── makefile
 ├── README.md
 ├── inc
@@ -34,7 +33,7 @@ The `src` folder contains all source code, as well as the main methods for serve
 
 ### SharedMemoryManager
 - This class serves as the parent class for TextServer and TextClient, defining the attribtues shared by both.
-- This class is defined in the files `inc/shared-memory-manager.h` and `src/shared-memory-manager.cc`
+- This class is defined in the files `inc/shared-memory-manager.h`
 - This class is included in `text-server.h` and `text-client.h`
 
 ### TextServer
@@ -50,16 +49,15 @@ The `src` folder contains all source code, as well as the main methods for serve
 - This class is defined in the files `inc/text-client.h` and `src/text-client.cc`
 - This class is included in `main-cli.cc`
 
-### SharedMemoryStruct
+### SmStruct
 - This struct is the structure used to hold data in shared memory
 - It holds a file path, a file path size, a buffer, and a buffer size
 - This struct is defined in the file `inc/shared-memory-struct.h`
 - This struct is included in `shared-memory-manager.h`
 
 ### ThreadArgs
-- This struct is used to pass arguments to the TextClient::threaded_search function
-- It holds a start index and stop index for searching, and a pointer to an instance of the TextClient object
-- This struct is defined in the file `inc/text-client.h`
+- This struct is used to pass the necessary arguments to the threaded search function of TextClient
+- This struct is defined in the file `inc/thread-args.h`
 - This struct is included in `src/text-client.h`
 
 ## Main Methods

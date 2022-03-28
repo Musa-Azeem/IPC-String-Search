@@ -1,3 +1,2 @@
 comments
-readme
 double triple check instructions

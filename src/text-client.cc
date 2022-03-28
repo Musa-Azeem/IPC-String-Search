@@ -1,4 +1,5 @@
 #include "../inc/text-client.h"
+#include "../inc/thread-args.h"
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <fcntl.h>
