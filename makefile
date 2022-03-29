@@ -2,8 +2,8 @@
 cc := g++
 
 # source code
-cli_src := src/main-cli.cc src/text-client.cc src/shared-memory-manager.cc
-srv_src := src/main-srv.cc src/text-server.cc src/shared-memory-manager.cc
+cli_src := src/main-cli.cc src/text-client.cc
+srv_src := src/main-srv.cc src/text-server.cc
 
 # final executables
 cli_exe := text-client
