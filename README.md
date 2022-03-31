@@ -45,7 +45,7 @@ The `src` folder contains all source code, as well as the main methods for serve
 
 ### TextClient
 - This class defines a Shared Memory client
-- Clients send the server a file path for the server to open and write to shared memory, and then searches for a string in the file lines
+- Clients send the server a file path for the server to open and write to shared memory, and then searches for a string in the file lines it reads from shared memory
 - This class is defined in the files `inc/text-client.h` and `src/text-client.cc`
 - This class is included in `main-cli.cc`
 
