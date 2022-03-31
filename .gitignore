@@ -1,4 +1,8 @@
 .vscode
 text-client
 text-server
+server_log.txt
+server_out.txt
+client_log.txt
+client_out.txt
 
