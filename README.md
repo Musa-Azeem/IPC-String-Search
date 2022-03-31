@@ -9,6 +9,7 @@
 │   ├── shared-memory-struct.h
 │   ├── text-server.h
 │   ├── text-client.h
+│   ├── thread-args.h
 │   └── ipc-names.h
 └── src
     ├── main-srv.cc
