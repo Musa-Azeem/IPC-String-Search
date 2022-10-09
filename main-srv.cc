@@ -6,8 +6,8 @@ This file contains the main method for text-server
     main method returns 1 if server returns an error, 
         and does not terminate otherwise
 */
-#include "../inc/text-server.h"
-#include "../inc/ipc-names.h"
+#include "./inc/text-server.h"
+#include "./inc/ipc-names.h"
 
 int main(){
     TextServer server(SM_NAME, SEM_NAME);

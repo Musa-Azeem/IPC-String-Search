@@ -6,8 +6,8 @@ This file contains the main method for text-client
         command line arugment values for path and search_str
     main method returns 0 if client runs successfully, and returns 1 if otherwise
 */
-#include "../inc/text-client.h"
-#include "../inc/ipc-names.h"
+#include "./inc/text-client.h"
+#include "./inc/ipc-names.h"
 #include <iostream>
 
 int main(int argc, char **argv){

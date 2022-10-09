@@ -1,7 +1,20 @@
-# CSCE311 Project 2
+# IPC String Search
+Author: Musa Azeem
+Date Complete: 4/31/2022
+
+This repository defines a client-server pair that searches for a string in a
+certain file using POSIX IPC. The client is given a filename and a search
+string. It then sends the file name to the server using Shared Memery. The
+server opens and loads the file of the given name into Shared Memory and
+signals the client to start searching the file in shared memory using threads.
+The client outputs any lines containing the given string.
+
+## Requirements
+Ubuntu 20.04 machine with C++17
 
 ## Directory Structure
 ```
+.
 ├── makefile
 ├── README.md
 ├── inc
@@ -18,6 +31,26 @@
     └── text-client.cc
 ```
 
+## Usage
+
+### Clone This Repository
+1. Open terminal
+2. Clone this repository
+```
+    git clone https://github.com/Musa-Azeem/IPC-String-Search
+```
+3. Change directory to local project
+```
+    cd IPC-String-Search
+```
+
+### Commands
+    clean repository:   make clean
+    compile server:     make text-server
+    compile client:     make text-client
+    run server:         ./text-server
+    run client:         ./text-client [file-to-search] [string-to-find]
+
 ## The following objects are defined in this directory:
 
     SharedMemoryManager
@@ -28,7 +61,7 @@
 
 The `inc` folder contains all headers for the classes
 
-The `src` folder contains all source code, as well as the main methods for server and client
+The `src` folder contains all source code
 
 ## Objects
 
